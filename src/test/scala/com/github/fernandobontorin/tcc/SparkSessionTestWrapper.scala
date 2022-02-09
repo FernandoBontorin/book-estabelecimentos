@@ -7,7 +7,7 @@ trait SparkSessionTestWrapper {
 
   lazy val spark: SparkSession = {
     Logger.getLogger("org").setLevel(Level.OFF)
-    SparkSession.builder().master("local").appName("spark session").getOrCreate()
+    SparkSession.builder().getOrCreate()
   }
 
 }
