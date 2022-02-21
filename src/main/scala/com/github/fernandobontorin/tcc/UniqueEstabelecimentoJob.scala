@@ -1,13 +1,13 @@
+
 package com.github.fernandobontorin.tcc
 
 import com.github.fernandobontorin.tcc.args.EstabelecimentoParameters
 import com.github.fernandobontorin.tcc.session.SparkSessionWrapper
 import com.github.fernandobontorin.tcc.transforms.features.{default_columns, isFarmacia, isSPCapital}
 import com.github.fernandobontorin.tcc.transforms.paths
-import org.apache.spark.sql.SaveMode
 import org.apache.spark.sql.functions.lit
 
-object EstabelecimentoJob extends SparkSessionWrapper {
+object UniqueEstabelecimentoJob extends SparkSessionWrapper {
   def main(args: Array[String]): Unit = {
     val params = EstabelecimentoParameters.parse(args)
 
@@ -21,7 +21,6 @@ object EstabelecimentoJob extends SparkSessionWrapper {
     }).reduce(_.union(_))
       .coalesce(1)
       .write
-      .mode(SaveMode.Overwrite)
       .options(
       Map("header" -> "true", "delimiter" -> ",")
     ).csv(params.output)

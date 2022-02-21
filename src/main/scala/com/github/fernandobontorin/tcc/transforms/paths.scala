@@ -6,7 +6,7 @@ object paths extends SparkSessionWrapper {
 
   def getIsoDateFrom(path: String): String = {
     val raw = path.split("[.]").head.takeRight(6)
-    s"${raw.substring(1, 4)}-${raw.substring(5, 6)}-01"
+    s"${raw.substring(0, 4)}-${raw.substring(4, 6)}-01"
   }
 
 }
