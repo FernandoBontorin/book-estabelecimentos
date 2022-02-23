@@ -2,6 +2,7 @@ package com.github.fernandobontorin.tcc.args
 
 case class EstabelecimentoParameters(
                                       inputs: Seq[String] = Seq[String](),
+                                      googleApisToken: String = "",
                                       output: String = ""
                                     ) extends Serializable
 
@@ -21,6 +22,11 @@ object EstabelecimentoParameters {
       .valueName("s3://my-bucket/output")
       .action((value, params) => params.copy(output = value))
       .text("set output of book")
+      .required()
+
+    opt[String]("google-apis-token")
+      .action((value, params) => params.copy(googleApisToken = value))
+      .text("set google API token")
       .required()
   }
 

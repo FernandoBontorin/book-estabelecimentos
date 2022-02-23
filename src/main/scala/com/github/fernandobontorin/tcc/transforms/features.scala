@@ -5,7 +5,7 @@ import org.apache.spark.sql.functions.{col, when}
 
 object features {
 
-  val default_columns: Seq[Column] = Seq[Column](
+  val defaultColumns: Seq[Column] = Seq[Column](
     col("CO_UNIDADE"),
     col("CO_CNES"),
     col("NU_CNPJ_MANTENEDORA"),
