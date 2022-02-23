@@ -70,19 +70,26 @@ object google {
     om.registerModule(DefaultScalaModule)
     om.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 
+    val url = "https://maps.googleapis.com/maps/api/geocode/json" + queryParams
+
+    val response = HttpClients
+      .createDefault()
+      .execute(
+        new HttpGet(
+          "https://maps.googleapis.com/maps/api/geocode/json" + queryParams
+        )
+      )
+    if (response.getStatusLine.getStatusCode != 200) {
+      throw new Error(
+        s"HTTP ${response.getStatusLine.getStatusCode} - GET $url"
+      )
+    }
+
     val location = om
       .readValue[GeoJson](
         scala.io.Source
           .fromInputStream(
-            HttpClients
-              .createDefault()
-              .execute(
-                new HttpGet(
-                  "https://maps.googleapis.com/maps/api/geocode/json" + queryParams
-                )
-              )
-              .getEntity
-              .getContent
+            response.getEntity.getContent
           )
           .mkString,
         classOf[GeoJson]
