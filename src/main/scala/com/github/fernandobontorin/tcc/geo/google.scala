@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.github.fernandobontorin.tcc.geo.models.google.GeoJson
 import org.apache.http.client.methods.HttpGet
-import org.apache.http.impl.client.HttpClients
+import org.apache.http.impl.client.{DefaultHttpRequestRetryHandler, HttpClients}
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions.{col, lit, udf}
@@ -15,9 +15,11 @@ import java.nio.charset.StandardCharsets
 
 object google {
 
-  val om: ObjectMapper = {
+  lazy val om: ObjectMapper = {
     new ObjectMapper().registerModule(DefaultScalaModule).disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
   }
+
+  lazy val httpClient = HttpClients.custom().setRetryHandler(new DefaultHttpRequestRetryHandler(Int.MaxValue, true)).build()
 
   val getGeoPosUDF: UserDefinedFunction = udf(
     (
@@ -72,8 +74,7 @@ object google {
 
     val url = "https://maps.googleapis.com/maps/api/geocode/json" + queryParams
 
-    val response = HttpClients
-      .createDefault()
+    val response = httpClient
       .execute(
         new HttpGet(
           "https://maps.googleapis.com/maps/api/geocode/json" + queryParams
