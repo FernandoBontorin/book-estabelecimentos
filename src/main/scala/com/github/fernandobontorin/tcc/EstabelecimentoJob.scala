@@ -3,20 +3,19 @@ package com.github.fernandobontorin.tcc
 import com.github.fernandobontorin.tcc.args.EstabelecimentoParameters
 import com.github.fernandobontorin.tcc.geo.google
 import com.github.fernandobontorin.tcc.session.SparkSessionWrapper
-import com.github.fernandobontorin.tcc.transforms.features.{
-  defaultColumns,
-  isFarmacia,
-  isSPCapital
-}
+import com.github.fernandobontorin.tcc.transforms.features.{defaultColumns, isFarmacia, isSPCapital, locationColumns}
 import com.github.fernandobontorin.tcc.transforms.paths
 import org.apache.spark.sql.SaveMode
 import org.apache.spark.sql.functions.lit
 
 object EstabelecimentoJob extends SparkSessionWrapper {
   def main(args: Array[String]): Unit = {
+    import spark.implicits._
+
     val params = EstabelecimentoParameters.parse(args)
 
-    params.inputs
+    /** merge all competencias in a dataframe */
+    val allEstabs = params.inputs
       .map(file => {
         spark.read
           .options(
@@ -27,14 +26,31 @@ object EstabelecimentoJob extends SparkSessionWrapper {
           .withColumn("competencia", lit(paths.getIsoDateFrom(file)))
           .where(isFarmacia)
           .where(isSPCapital)
-          .select(
-            defaultColumns ++ Seq(
-              google.latitude(params.googleApisToken),
-              google.longitude(params.googleApisToken)
-            ): _*
-          )
       })
       .reduce(_.union(_))
+
+    /** create unique dataframes with location  */
+    val uniqueEstabs = allEstabs
+      .select(locationColumns:_*)
+      .distinct()
+      .collect()
+      .map(row => (
+        row.getAs[Long]("CO_UNIDADE"),
+        row.getAs[Long]("CO_CNES"),
+        row.getAs[String]("NO_LOGRADOURO"),
+        row.getAs[String]("NU_ENDERECO"),
+        row.getAs[String]("CO_CEP"),
+        google.getLocation(
+          params.googleApisToken,
+          row.getAs[String]("NO_LOGRADOURO"),
+          row.getAs[String]("NU_ENDERECO"),
+          row.getAs[String]("CO_CEP")
+        ):_*
+      )).toSeq.toDF("CO_UNIDADE", "CO_CNES", "LATITUDE", "LONGITUDE")
+
+    /** join all estabs with its latitude and longitude */
+    allEstabs
+      .join(uniqueEstabs, Seq("CO_UNIDADE", "CO_CNES"))
       .coalesce(1)
       .write
       .mode(SaveMode.Overwrite)
