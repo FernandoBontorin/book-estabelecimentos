@@ -11,4 +11,6 @@ libraryDependencies += "com.github.scopt" %% "scopt" % "4.0.1"
 libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "1.0.0" % "test"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.11" % "test"
 
-assembly / mainClass := Some("com.github.fernandobontorin.tcc.EstabelecimentoJob")
+assembly / mainClass := Some(
+  "com.github.fernandobontorin.tcc.EstabelecimentoJob"
+)

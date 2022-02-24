@@ -4,11 +4,7 @@ import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.github.fernandobontorin.tcc.geo.models.google.GeoJson
 import org.apache.http.client.methods.HttpGet
-import org.apache.http.impl.client.{
-  CloseableHttpClient,
-  DefaultHttpRequestRetryHandler,
-  HttpClients
-}
+import org.apache.http.impl.client.{CloseableHttpClient, DefaultHttpRequestRetryHandler, HttpClients}
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -37,7 +33,7 @@ object google {
       city: String = "São Paulo",
       state: String = "SP",
       country: String = "Brasil"
-  ): (Double, Double) = {
+  ): Seq[Double] = {
     val queryParams = "?" +
       Map(
         "address" -> s"${route.trim}, ${streetNumber.trim} - ${postalCode.trim.reverse
@@ -60,7 +56,7 @@ object google {
         )
       )
     if (response.getStatusLine.getStatusCode != 200) {
-      return (-1d, -1d)
+      return Seq(-1d, -1d)
     }
 
     val location = om
@@ -76,6 +72,6 @@ object google {
       .head
       .geometry
       .location
-    (location.lat, location.lng)
+    Seq(location.lat, location.lng)
   }
 }

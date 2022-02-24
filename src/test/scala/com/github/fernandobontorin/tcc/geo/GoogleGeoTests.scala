@@ -1,8 +1,6 @@
 package com.github.fernandobontorin.tcc.geo
 
 import com.github.fernandobontorin.tcc.SparkSessionTestWrapper
-import org.apache.spark.sql.functions.{col, lpad}
-import org.apache.spark.sql.types.StringType
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
@@ -24,7 +22,7 @@ class GoogleGeoTests
         google.latitude(keyG), google.longitude(keyG)): _*
     )
     dfGeo.show()
-    */
+     */
   }
 
 }

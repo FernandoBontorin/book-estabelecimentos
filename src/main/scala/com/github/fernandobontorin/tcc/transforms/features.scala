@@ -42,8 +42,10 @@ object features {
 
   def isFarmacia: Column = when(col("TP_UNIDADE") === 43, true).otherwise(false)
 
-  def isSPCapital: Column = when(col("CO_MUNICIPIO_GESTOR") === 355030, true).otherwise(false)
+  def isSPCapital: Column =
+    when(col("CO_MUNICIPIO_GESTOR") === 355030, true).otherwise(false)
 
-  def isSPEstado: Column = when(col("CO_MUNICIPIO_GESTOR") === 35, true).otherwise(false)
+  def isSPEstado: Column =
+    when(col("CO_MUNICIPIO_GESTOR") === 35, true).otherwise(false)
 
 }
