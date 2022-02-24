@@ -3,7 +3,12 @@ package com.github.fernandobontorin.tcc
 import com.github.fernandobontorin.tcc.args.EstabelecimentoParameters
 import com.github.fernandobontorin.tcc.geo.google
 import com.github.fernandobontorin.tcc.session.SparkSessionWrapper
-import com.github.fernandobontorin.tcc.transforms.features.{defaultColumns, isFarmacia, isSPCapital, locationColumns}
+import com.github.fernandobontorin.tcc.transforms.features.{
+  defaultColumns,
+  isFarmacia,
+  isSPCapital,
+  locationColumns
+}
 import com.github.fernandobontorin.tcc.transforms.paths
 import org.apache.spark.sql.SaveMode
 import org.apache.spark.sql.functions.lit
@@ -29,24 +34,27 @@ object EstabelecimentoJob extends SparkSessionWrapper {
       })
       .reduce(_.union(_))
 
-    /** create unique dataframes with location  */
+    /** create unique dataframes with location */
     val uniqueEstabs = allEstabs
-      .select(locationColumns:_*)
+      .select(locationColumns: _*)
       .distinct()
       .collect()
-      .map(row => (
-        row.getAs[Long]("CO_UNIDADE"),
-        row.getAs[Long]("CO_CNES"),
-        row.getAs[String]("NO_LOGRADOURO"),
-        row.getAs[String]("NU_ENDERECO"),
-        row.getAs[String]("CO_CEP"),
-        google.getLocation(
+      .toSeq
+      .map(row => {
+        val location = google.getLocation(
           params.googleApisToken,
           row.getAs[String]("NO_LOGRADOURO"),
           row.getAs[String]("NU_ENDERECO"),
           row.getAs[String]("CO_CEP")
-        ):_*
-      )).toSeq.toDF("CO_UNIDADE", "CO_CNES", "LATITUDE", "LONGITUDE")
+        )
+        (
+          row.getAs[Long]("CO_UNIDADE"),
+          row.getAs[Long]("CO_CNES"),
+          location.lat,
+          location.lng
+        )
+      })
+      .toDF("CO_UNIDADE", "CO_CNES", "LATITUDE", "LONGITUDE")
 
     /** join all estabs with its latitude and longitude */
     allEstabs
