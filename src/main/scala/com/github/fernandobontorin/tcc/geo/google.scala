@@ -3,12 +3,10 @@ package com.github.fernandobontorin.tcc.geo
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.github.fernandobontorin.tcc.geo.models.google.{GeoJson, Location}
+import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.HttpGet
-import org.apache.http.impl.client.{
-  CloseableHttpClient,
-  DefaultHttpRequestRetryHandler,
-  HttpClients
-}
+import org.apache.http.config.ConnectionConfig
+import org.apache.http.impl.client.{CloseableHttpClient, DefaultHttpRequestRetryHandler, HttpClients}
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -25,7 +23,13 @@ object google {
     HttpClients
       .custom()
       .setRetryHandler(
-        new DefaultHttpRequestRetryHandler(10, true)
+        new DefaultHttpRequestRetryHandler(5, true)
+      )
+      .setDefaultRequestConfig(
+        RequestConfig.custom()
+          .setConnectTimeout(10000)
+          .setConnectionRequestTimeout(10000)
+          .setSocketTimeout(10000).build()
       )
       .build()
 
