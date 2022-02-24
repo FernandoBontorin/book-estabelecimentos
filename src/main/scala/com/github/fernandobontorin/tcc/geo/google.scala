@@ -15,6 +15,10 @@ import java.nio.charset.StandardCharsets
 
 object google {
 
+  val om: ObjectMapper = {
+    new ObjectMapper().registerModule(DefaultScalaModule).disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+  }
+
   val getGeoPosUDF: UserDefinedFunction = udf(
     (
         key: String,
@@ -52,7 +56,7 @@ object google {
       city: String = "São Paulo",
       state: String = "SP",
       country: String = "Brasil"
-  ): String = {
+  ): Double = {
     val queryParams = "?" +
       Map(
         "address" -> s"${route.trim}, ${streetNumber.trim} - ${postalCode.trim.reverse
@@ -66,10 +70,6 @@ object google {
         }
         .mkString("&")
 
-    val om = new ObjectMapper()
-    om.registerModule(DefaultScalaModule)
-    om.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-
     val url = "https://maps.googleapis.com/maps/api/geocode/json" + queryParams
 
     val response = HttpClients
@@ -80,9 +80,7 @@ object google {
         )
       )
     if (response.getStatusLine.getStatusCode != 200) {
-      throw new Error(
-        s"HTTP ${response.getStatusLine.getStatusCode} - GET $url"
-      )
+      return -1D
     }
 
     val location = om
@@ -100,8 +98,8 @@ object google {
       .location
 
     if (Seq("lat", "latitude").contains(flag.toLowerCase))
-      return location.lat.toString
-    location.lng.toString
+      return location.lat
+    location.lng
 
   }
 }
