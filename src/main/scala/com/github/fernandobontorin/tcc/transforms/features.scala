@@ -33,8 +33,8 @@ object features {
   )
 
   val locationColumns: Seq[Column] = Seq[Column](
-    col("CO_UNIDADE"),
-    col("CO_CNES"),
+    col("CO_UNIDADE").cast(StringType),
+    col("CO_CNES").cast(StringType),
     col("NO_LOGRADOURO").cast(StringType),
     col("NU_ENDERECO").cast(StringType),
     col("CO_CEP").cast(StringType)

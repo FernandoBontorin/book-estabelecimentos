@@ -48,8 +48,8 @@ object EstabelecimentoJob extends SparkSessionWrapper {
           row.getAs[String]("CO_CEP")
         )
         (
-          row.getAs[Long]("CO_UNIDADE"),
-          row.getAs[Long]("CO_CNES"),
+          row.getAs[String]("CO_UNIDADE"),
+          row.getAs[String]("CO_CNES"),
           location.lat,
           location.lng
         )
