@@ -58,7 +58,7 @@ object EstabelecimentoJob extends SparkSessionWrapper {
 
     /** join all estabs with its latitude and longitude */
     allEstabs
-      .join(uniqueEstabs, Seq("CO_UNIDADE", "CO_CNES"))
+      .join(uniqueEstabs, Seq("CO_UNIDADE", "CO_CNES"), "right")
       .coalesce(1)
       .write
       .mode(SaveMode.Overwrite)

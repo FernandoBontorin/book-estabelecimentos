@@ -5,8 +5,11 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.github.fernandobontorin.tcc.geo.models.google.{GeoJson, Location}
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.HttpGet
-import org.apache.http.config.ConnectionConfig
-import org.apache.http.impl.client.{CloseableHttpClient, DefaultHttpRequestRetryHandler, HttpClients}
+import org.apache.http.impl.client.{
+  CloseableHttpClient,
+  DefaultHttpRequestRetryHandler,
+  HttpClients
+}
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -26,10 +29,12 @@ object google {
         new DefaultHttpRequestRetryHandler(5, true)
       )
       .setDefaultRequestConfig(
-        RequestConfig.custom()
+        RequestConfig
+          .custom()
           .setConnectTimeout(10000)
           .setConnectionRequestTimeout(10000)
-          .setSocketTimeout(10000).build()
+          .setSocketTimeout(10000)
+          .build()
       )
       .build()
 
@@ -63,7 +68,10 @@ object google {
           url
         )
       )
-    if (response.getStatusLine.getStatusCode != 200) {
+    if (
+      response.getStatusLine.getStatusCode != 200 || response.getEntity.getContentLength == 1
+    ) {
+      println(s"ERROR HTTP ${response.getStatusLine.getStatusCode} GET $url")
       return Location(-1d, -1d)
     }
 
