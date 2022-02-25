@@ -3,16 +3,10 @@ package com.github.fernandobontorin.tcc.geo
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.github.fernandobontorin.tcc.geo.models.google.{GeoJson, Location}
+import com.sun.org.slf4j.internal.LoggerFactory
 import org.apache.http.client.config.RequestConfig
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.impl.client.{
-  CloseableHttpClient,
-  DefaultHttpRequestRetryHandler,
-  HttpClients
-}
-
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
+import org.apache.http.impl.client.{CloseableHttpClient, DefaultHttpRequestRetryHandler, HttpClients}
+import sttp.client3._
 
 object google {
 
@@ -47,41 +41,19 @@ object google {
       state: String = "SP",
       country: String = "Brasil"
   ): Location = {
-    val queryParams = "?" +
-      Map(
-        "address" -> s"${route.trim}, ${streetNumber.trim} - ${postalCode.trim.reverse
+
+    LoggerFactory.getLogger(getClass).error(s"Query ${route}")
+    val response = sttp.client3.basicRequest
+      .get(
+        uri"https://maps.googleapis.com/maps/api/geocode/json?address=${route.trim}, ${streetNumber.trim} - ${postalCode.trim.reverse
           .padTo(8, '0')
-          .reverse} ${city.trim} ${state.trim} ${country.trim}",
-        "key" -> key
-      ).toArray
-        .map {
-          case (k, v) =>
-            s"$k=${URLEncoder.encode(v, StandardCharsets.UTF_8.toString)}"
-        }
-        .mkString("&")
-
-    val url = "https://maps.googleapis.com/maps/api/geocode/json" + queryParams
-
-    val response = httpClient
-      .execute(
-        new HttpGet(
-          url
-        )
+          .reverse} ${city.trim} ${state.trim} ${country.trim}&key=$key"
       )
-    if (
-      response.getStatusLine.getStatusCode != 200 || response.getEntity.getContentLength == 1
-    ) {
-      println(s"ERROR HTTP ${response.getStatusLine.getStatusCode} GET $url")
-      return Location(-1d, -1d)
-    }
+      .send(HttpURLConnectionBackend())
 
     om
       .readValue[GeoJson](
-        scala.io.Source
-          .fromInputStream(
-            response.getEntity.getContent
-          )
-          .mkString,
+        response.body.getOrElse(return Location(0d, 0d)),
         classOf[GeoJson]
       )
       .results

@@ -10,19 +10,9 @@ class GoogleGeoTests
     with SparkSessionTestWrapper {
 
   "geo google" should "create a column LATITUDE" in {
-    /*
-    val keyG = ""
-    import spark.implicits._
-    val df = Seq(("AV BRIGADEIRO LUIZ ANTONIO", "683", "1317000")).toDF(
-      Seq("NO_LOGRADOURO", "NU_ENDERECO", "CO_CEP"): _*
-    )
-
-    val dfGeo = df.select(
-      df.columns.map(col) ++ Seq(
-        google.latitude(keyG), google.longitude(keyG)): _*
-    )
-    dfGeo.show()
-     */
+    /*val keyG = ""
+    val location = google.getLocation(keyG, "Rua Santa Cruz", "81", "04121000")
+    println(location)*/
   }
 
 }
